@@ -1,0 +1,49 @@
+﻿---
+- name: Update nameservers on Raspberry Pis
+  hosts: all,!otsrvcibernetica
+  become: yes
+
+  tasks:
+    - name: Detect operating system
+      ansible.builtin.setup:
+      register: system_info
+
+    - name: Update nameserver for Ubuntu (Netplan)
+      when: "'Ubuntu' in system_info.ansible_facts['ansible_distribution']"
+      block:
+        - name: Replace nameserver in Netplan configuration
+          ansible.builtin.replace:
+            path: /etc/netplan/50-cloud-init.yaml
+            regexp: '172\.17\.3\.6'
+            replace: '198.51.100.20'
+          register: netplan_replaced
+
+        - name: Apply Netplan configuration
+          ansible.builtin.command: netplan apply
+          async: 45
+          poll: 0
+          when: netplan_replaced is changed
+
+    - name: Update nameserver for Raspbian (dhcpcd.conf)
+      when: "'Ubuntu' not in system_info.ansible_facts['ansible_distribution']"
+      block:
+        - name: Replace nameserver in dhcpcd.conf
+          ansible.builtin.replace:
+            path: /etc/dhcpcd.conf
+            regexp: 'static domain_name_servers=172\.17\.3\.6'
+            replace: 'static domain_name_servers=198.51.100.20'
+          register: dhcpcd_replaced
+
+        - name: Restart dhcpcd service to apply changes
+          ansible.builtin.service:
+            name: dhcpcd
+            state: restarted
+          async: 45
+          poll: 0
+          when: dhcpcd_replaced is changed
+
+"""
+# Check DNS servers:
+# Ubuntu: cat /run/systemd/resolve/resolv.conf
+# Rasp: cat /etc/resolv.conf
+""" 

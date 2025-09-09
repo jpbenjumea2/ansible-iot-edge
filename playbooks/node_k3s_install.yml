@@ -1,0 +1,10 @@
+﻿---
+- name: Install K3s
+  hosts: all,!otsrvcibernetica
+  become: true
+
+  tasks:
+    - name: Download and Install K3s
+      shell: >
+        curl -sfL https://get.k3s.io |
+        K3S_TOKEN="${K3S_TOKEN}" K3S_URL="https://k3s.example.com:6443" sh -

@@ -1,0 +1,21 @@
+---
+- name: Configuración del sistema Raspberry Pi
+  hosts: all,!otsrvcibernetica
+  become: true  # Para ejecutar tareas con privilegios de superusuario
+
+  tasks:
+    - name: Añadir opciones a /boot/cmdline.txt
+      lineinfile:
+        path: /boot/cmdline.txt
+        state: present
+        regexp: '^(console(.*)$)'
+        backrefs: yes
+        line: '\1 cgroup_memory=1 cgroup_enable=memory'
+
+    - name: Añadir opción a /boot/config.txt
+      lineinfile:
+        path: /boot/config.txt
+        line: 'arm_64bit=1'
+
+    #- name: Reboot
+      #ansible.builtin.reboot:

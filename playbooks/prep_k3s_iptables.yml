@@ -1,0 +1,21 @@
+---
+- name: Configure iptables on all hosts
+  hosts: all,!otservcibernetica
+  become: true  # Run tasks with sudo
+
+  tasks:
+    - name: Flush iptables rules
+      ansible.builtin.shell: sudo iptables -F
+
+    - name: Set iptables alternative to iptables-legacy
+      ansible.builtin.shell: sudo update-alternatives --set iptables /usr/sbin/iptables-legacy
+
+    - name: Set ip6tables alternative to ip6tables-legacy
+      ansible.builtin.shell: sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+
+    - name: Reboot the system
+      ansible.builtin.reboot:
+      async: 0
+      poll: 0
+      ignore_errors: true
+

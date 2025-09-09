@@ -1,0 +1,23 @@
+---
+- name: Install Node-RED
+  hosts: all,!otsrvcibernetica
+  become: yes  # Run tasks with elevated privileges (sudo)
+  environment:
+    DEBIAN_FRONTEND: noninteractive  # Set the environment variable
+
+  tasks:
+    - name: Display Current Date
+      debug:
+        msg: "Time: {{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+
+    - name: Update package lists
+      apt:
+        update_cache: yes
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: yes
+
+    - name: Autoremove
+      apt:
+        autoremove: yes

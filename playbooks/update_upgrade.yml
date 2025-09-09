@@ -1,0 +1,38 @@
+---
+- name: Update and Upgrade Packages
+  hosts: all,!rpi_no_update
+  become: yes  # Run tasks with elevated privileges (sudo)
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+  tasks:
+    - name: Display Current Date
+      debug:
+        msg: "Time: {{ ansible_date_time.date }} {{ ansible_date_time.time }}"
+
+    - name: Update package lists
+      ansible.builtin.apt:
+        update_cache: yes
+      register: update_result
+
+    - name: Execute 'sudo apt update -y' if update fails
+      ansible.builtin.shell: "sudo apt update -y"
+      when: update_result.failed
+
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: yes
+      register: upgrade_result
+
+    - name: Execute 'sudo apt upgrade -y' if update fails
+      ansible.builtin.shell: "sudo apt upgrade -y"
+      when: upgrade_result.failed
+
+    - name: Autoremove
+      ansible.builtin.apt:
+        autoremove: yes
+      register: autoremove_result
+
+    - name: Execute 'sudo apt autoremove -y' if update fails
+      ansible.builtin.shell: "sudo apt autoremove -y"
+      when: autoremove_result.failed

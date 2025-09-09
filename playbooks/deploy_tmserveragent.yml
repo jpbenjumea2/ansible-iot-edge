@@ -1,0 +1,26 @@
+﻿---
+- name: Deploy TM Server Agent
+  hosts: rpi_ubuntu
+  become: yes
+
+  tasks:
+    - name: Ensure target directory exists
+      file:
+        path: /tmp/TM/
+        state: directory
+
+    - name: Copy TM Server Agent tarball
+      copy:
+        src: /home/user/packages/TMServerAgent_Linux_auto_AArch64_workload.tar
+        dest: /tmp/TM/TMServerAgent_Linux_auto_AArch64_workload.tar
+
+    - name: Extract TM Server Agent tarball
+      ansible.builtin.unarchive:
+        src: /tmp/TM/TMServerAgent_Linux_auto_AArch64_workload.tar
+        dest: /tmp/TM/
+        remote_src: yes
+
+    - name: Install TM Server Agent
+      command: ./tmxbc install
+      args:
+        chdir: /tmp/TM/

@@ -1,0 +1,8 @@
+---
+- name: Reboot Devices
+  hosts: all,!otsrvcibernetica  # Replace with the hosts you want to reboot
+  become: yes  # Run tasks with elevated privileges (sudo)
+
+  tasks:
+    - name: Reboot the devices
+      ansible.builtin.reboot:
